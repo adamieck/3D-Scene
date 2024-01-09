@@ -1,0 +1,26 @@
+#version 410 core
+
+layout (vertices=16) out;
+uniform float TessLevel;
+
+in vec2 TexCoord[];
+out vec2 TextureCoord[];
+
+void main()
+{
+    // pass through
+    gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
+    TextureCoord[gl_InvocationID] = TexCoord[gl_InvocationID];
+
+    if (gl_InvocationID == 0)
+    {
+        gl_TessLevelOuter[0] = TessLevel;
+        gl_TessLevelOuter[1] = TessLevel;
+        gl_TessLevelOuter[2] = TessLevel;
+        gl_TessLevelOuter[3] = TessLevel;
+
+        gl_TessLevelInner[0] = TessLevel;
+        gl_TessLevelInner[1] = TessLevel;
+    }
+}
+
