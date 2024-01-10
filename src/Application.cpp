@@ -144,6 +144,46 @@ void DisplayFileDialog(Texture* texture, const char* buttonTitle, const char* di
     }
 }
 
+void ImGuiSetCatppuccinTheme()
+{
+    ImGuiIO& io = ImGui::GetIO();
+
+    // Font
+    ImFont* jetMono = io.Fonts->AddFontFromFileTTF("res/fonts/JetBrainsMono-Bold.ttf", 16);
+    ImGui_ImplOpenGL3_CreateFontsTexture();
+
+    auto& colors = ImGui::GetStyle().Colors;
+    colors[ImGuiCol_WindowBg] = ImVec4{ 0.117, 0.117, 0.180, 1.0f }; // mocha base
+    colors[ImGuiCol_ChildBg] = ImVec4{ 0.094, 0.094, 0.145, 1.0f }; // mocha mantle
+    colors[ImGuiCol_Border] = ImVec4{ 0.117, 0.117, 0.180, 1.0f }; // mocha base
+
+    // Headers
+    colors[ImGuiCol_Header] = ImVec4{ 0.537, 0.862, 0.921, 1.0f };
+    colors[ImGuiCol_HeaderHovered] = ImVec4{ 0.537, 0.862, 0.921, 1.0f };
+    colors[ImGuiCol_HeaderActive] = ImVec4{ 0.537, 0.862, 0.921, 1.0f };
+
+    colors[ImGuiCol_Text] = ImVec4{ 0.803, 0.839, 0.956, 1.f }; // mocha sapphire
+
+    // Buttons
+    colors[ImGuiCol_Button] = ImVec4{ 0.405, 0.573, 0.838, 1.0f }; // mocha blue modified #6792d6
+    colors[ImGuiCol_ButtonHovered] = ImVec4{ 0.537, 0.705, 0.980, 1.0f };
+    colors[ImGuiCol_ButtonActive] = ImVec4{ 0.537, 0.705, 0.980, 1.0f };
+
+    //// Frame BG
+    colors[ImGuiCol_FrameBg] = ImVec4{ 0.423, 0.439, 0.525, 1.0f }; // mocha overlay0
+    colors[ImGuiCol_FrameBgHovered] = ImVec4{ 0.498, 0.517, 0.611, 1.0f }; // mocha overlay1
+    colors[ImGuiCol_FrameBgActive] = ImVec4{ 0.498, 0.517, 0.611, 1.0f }; // mocha overlay1
+
+    colors[ImGuiCol_CheckMark] = ImVec4{ 0.454, 0.780, 0.925, 1.f }; // mocha sapphire
+    colors[ImGuiCol_SliderGrab] = ImVec4{ 0.980, 0.701, 0.529, 1.f }; // mocha peach
+    colors[ImGuiCol_SliderGrabActive] = ImVec4{ 0.976, 0.886, 0.686, 1.f }; // mocha yellow
+
+    //// Title
+    colors[ImGuiCol_TitleBg] = ImVec4{ 0.498, 0.517, 0.611, 1.0f }; // mocha overlay1
+    colors[ImGuiCol_TitleBgActive] = ImVec4{ 0.498, 0.517, 0.611, 1.0f };
+    colors[ImGuiCol_TitleBgCollapsed] = ImVec4{ 0.498, 0.517, 0.611, 1.0f };
+}
+
 int main(void) 
 {
     /* INITIALIZATION */
@@ -243,6 +283,8 @@ int main(void)
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 410");
+    ImGuiSetCatppuccinTheme();
+
 
     glm::mat4 model;
     glm::mat4 modelY;
@@ -388,6 +430,8 @@ int main(void)
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
+        
+
 
         FPSCounter(deltaTime);
         ImGui::Separator();
@@ -463,6 +507,7 @@ int main(void)
 
 
 
+        //ImGui::PopFont();
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         //ImGui end //

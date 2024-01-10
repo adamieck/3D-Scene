@@ -623,6 +623,9 @@
     <Image Include="res\normalmaps\stone_floor.jpg" />
     <Image Include="res\textures\stone_floor.jpg" />
   </ItemGroup>
+  <ItemGroup>
+    <Font Include="res\fonts\JetBrainsMono-Regular.ttf" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
