@@ -1,6 +1,5 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -402,10 +401,10 @@ int main(void)
             renderer.Draw(va, shader, sizeof(vertices) / (sizeof(float) * 5));
             glm::mat4 MVPY = proj * view * modelY;
             shader.SetUniformMatrix4f("MVP", MVPY);
-            renderer.Draw(va, shader, sizeof(vertices) / (sizeof(float) * 5));
+            //renderer.Draw(va, shader, sizeof(vertices) / (sizeof(float) * 5));
             glm::mat4 MVPZ = proj * view * modelZ;
             shader.SetUniformMatrix4f("MVP", MVPZ);
-            renderer.Draw(va, shader, sizeof(vertices) / (sizeof(float) * 5));
+            //renderer.Draw(va, shader, sizeof(vertices) / (sizeof(float) * 5));
 
         }
         if (isWireframe)
