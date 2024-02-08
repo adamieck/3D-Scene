@@ -72,6 +72,9 @@
     <ClCompile Include="src\Mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\shaders\texture.frag" />
@@ -513,7 +516,6 @@
     <None Include="dependencies\assimp\include\vector3.inl">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="dependencies\assimp\assimp-vc143-mt.dll" />
     <None Include="dependencies\assimp\assimp\color4.inl">
       <Filter>Header Files</Filter>
     </None>
@@ -538,6 +540,9 @@
     <None Include="dependencies\assimp\assimp\vector3.inl">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="res\shaders\model.vert" />
+    <None Include="res\shaders\model.frag" />
+    <None Include="dependencies\assimp\assimp-vc143-mt.dll" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Renderer.h">
@@ -1954,6 +1959,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

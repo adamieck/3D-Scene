@@ -8,6 +8,7 @@
 #include "Camera.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
+#include "Model.h"
 #include "Renderer.h"
 #include "Shader.h"
 #include "Texture.h"
@@ -266,6 +267,10 @@ int main(void)
         .AddShader("res/shaders/texture.tes", ShaderType::TESS_EVAL);
     shaderWire.Build();
 
+    Shader modelShader;
+    modelShader.AddShader("res/shaders/model.vert", ShaderType::VERTEX)
+        .AddShader("res/shaders/model.frag", ShaderType::FRAGMENT);
+
     Texture tex("res/textures/stone_floor.jpg", 0);
     tex.Bind(0);
     shader.SetUniform1i("_Tex", 0); // (name , tex_slot)
@@ -317,6 +322,7 @@ int main(void)
     shader.SetUniform3fv("LightColor", lightColor);
     float arg = 0;
     float rotateTime = 0;
+    Model garfield = Model("res/models/Garfield/garfield.obj");
     while (!glfwWindowShouldClose(window))
     {
         float currentFrame = static_cast<float>(glfwGetTime());
@@ -395,6 +401,9 @@ int main(void)
         // Main Draw Call
 
         //glDisable(GL_DEPTH_TEST);
+        shader.Unbind();
+        shaderWire.Unbind();
+        garfield.Draw(modelShader);
 
         if (isFill)
         {
