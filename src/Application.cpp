@@ -278,12 +278,14 @@ int main(void)
     layout.Push(GL_FLOAT, 3);
     layout.Push(GL_FLOAT, 2);
     va.AddBuffer(vb, layout);
+    va.Unbind();
 
     Shader modelShader;
     modelShader.AddShader("res/shaders/viewPhong.vert", ShaderType::VERTEX)
         .AddShader("res/shaders/viewPhong.frag", ShaderType::FRAGMENT);
     modelShader.Build();
-    
+    Model desert = Model("res/models/Desert/oasis.obj");
+
     Shader shader;
     shader.AddShader("res/shaders/texture.vert", ShaderType::VERTEX)
         .AddShader("res/shaders/texture.frag", ShaderType::FRAGMENT)
@@ -297,8 +299,8 @@ int main(void)
     tex.Bind(0);
     shader.SetUniform1i("_Tex", 0); // (name , tex_slot)
 
-    Texture normalmap("res/normalmaps/stone_floor.jpg", 1);
-    normalmap.Bind(1);
+    //Texture normalmap("res/normalmaps/stone_floor.jpg", 1);
+    //normalmap.Bind(1);
 	//shader.SetUniform1i("_NormalMap", 1);
 
     //glm::vec4 col = glm::vec4(0.70f, 0.745f, 0.99f, 1.0f);
@@ -334,10 +336,9 @@ int main(void)
     float fogIntensity = 0.5;
     glm::vec3 fogColor = glm::vec3(0.286f, 0.902f, 0.902f);
 
-
+    va.Unbind();
     //Model garfield = Model("res/models/Garfield/garfield.obj");
-    Model desert = Model("res/models/Desert/desert2.obj");
-    //Model diorama = Model("res/models/Desert/diorama.obj");
+    Model diorama = Model("res/models/Desert/diorama.obj");
     //Model backpack = Model("res/models/Backpack/backpack.obj");
     Light light{ glm::vec3(5.0,0.44,12.08), glm::vec3(0.5,0.5,0.5),
     glm::vec3(0.8,0.8,0.8), glm::vec3(0.4,0.4,0.4) };
@@ -417,7 +418,7 @@ int main(void)
         //modelShader.SetUniformMatrix4f("MVP", MVP);
         desert.Draw(modelShader);
         //garfield.Draw(modelShader);
-        //diorama.Draw(modelShader);
+        diorama.Draw(modelShader);
         modelShader.Unbind();
 
         // Bezier draw
@@ -450,8 +451,6 @@ int main(void)
             ImGui::SliderFloat("Fog Intensity", &fogIntensity, 0.0f, 1.0f);
 
             ImGui::ColorEdit3("Fog Color", (float*)&fogColor);
-            ImGui::Checkbox("Light?", &hasLight);
-            ImGui::Checkbox("Reflectors?", &hasReflectors);
 
             if (ImGui::Button("Day!")) {
                 renderer.ChangeBackground(0.286f, 0.902f, 0.902f);

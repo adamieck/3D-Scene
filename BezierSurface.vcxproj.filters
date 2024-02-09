@@ -545,6 +545,8 @@
     <None Include="dependencies\assimp\assimp-vc143-mt.dll" />
     <None Include="res\shaders\viewPhong.vert" />
     <None Include="res\shaders\viewPhong.frag" />
+    <None Include="res\shaders\viewGouraud.vert" />
+    <None Include="res\shaders\viewGouraud.frag" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Renderer.h">

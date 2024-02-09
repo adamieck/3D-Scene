@@ -50,11 +50,11 @@ void main()
     vec3 specular = specularStrength * spec * light.specular; 
     
     vec4 textureColor = texture(texture_diffuse1, texCoords);
-    vec3 result = (ambient + diffuse + specular) * textureColor.xyz;
+    vec3 result = (ambient + diffuse + specular);
 
     float fog_factor = CalcFogFactor(FragPos);
     result = mix(fogColor, result, fog_factor);
     result = clamp(result, 0.0, 1.0);
 
-    FragColor = vec4(result, 1.0);
+    FragColor = vec4(result, 1.0) * textureColor;
 }

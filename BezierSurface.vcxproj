@@ -206,6 +206,8 @@
     <None Include="res\shaders\texture.vert" />
     <None Include="res\shaders\fancy.frag" />
     <None Include="res\shaders\fancy.vert" />
+    <None Include="res\shaders\viewGouraud.frag" />
+    <None Include="res\shaders\viewGouraud.vert" />
     <None Include="res\shaders\viewPhong.frag" />
     <None Include="res\shaders\viewPhong.vert" />
     <None Include="src\glm\detail\func_common.inl" />
