@@ -24,7 +24,7 @@ void Mesh::Draw(Shader& shader)
     unsigned int heightNr = 1;
     for (unsigned int i = 0; i < textures.size(); i++)
     {
-        glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
+        glActiveTexture(GL_TEXTURE0 + i + 2); // active proper texture unit before binding
         // retrieve texture number (the N in diffuse_textureN)
         std::string number;
         std::string name = textures[i].type;
@@ -38,9 +38,7 @@ void Mesh::Draw(Shader& shader)
             number = std::to_string(heightNr++); 
 
         //glUniform1i(glGetUniformLocation(shader., (name + number).c_str()), i);
-        std::cout << (name + number).c_str() << " loaded!! \n";
-        shader.SetUniform1i((name + number).c_str(), i);
-        std::cout << "Text id: " << textures[i].id << std::endl;
+        shader.SetUniform1i((name + number).c_str(), i + 2);
         glBindTexture(GL_TEXTURE_2D, textures[i].id);
     }
 
@@ -99,4 +97,7 @@ void Mesh::setupMesh()
     // vertex texture coords
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoords));
+    // material color values
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, colors));
 }

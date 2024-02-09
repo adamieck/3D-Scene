@@ -53,7 +53,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
         vector.y = mesh->mVertices[i].y;
         vector.z = mesh->mVertices[i].z;
         vertex.position = vector;
-    	vertices.push_back(vertex);
+    	
 
         vector.x = mesh->mNormals[i].x;
         vector.y = mesh->mNormals[i].y;
@@ -69,6 +69,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
         }
         else
             vertex.texCoords = glm::vec2(0.0f, 0.0f);
+        vertices.push_back(vertex);
     }
     // process indices
     for (unsigned int i = 0; i < mesh->mNumFaces; i++)
@@ -104,6 +105,7 @@ unsigned int TextureFromFile(const char* path, const std::string& directory)
     glGenTextures(1, &textureID);
 
     int width, height, nrComponents;
+    //stbi_set_flip_vertically_on_load(1);
     unsigned char* data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
     if (data)
     {

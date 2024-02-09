@@ -19,6 +19,7 @@
 #include "imgui/imgui_impl_opengl3.h"
 #include "glm/gtc/matrix_transform.hpp"
 #include "ImGuiFileDialog/ImGuiFileDialog.h"
+#include "stb/stb_image.h"
 
 
 int WIDTH = 800;
@@ -270,6 +271,7 @@ int main(void)
     Shader modelShader;
     modelShader.AddShader("res/shaders/model.vert", ShaderType::VERTEX)
         .AddShader("res/shaders/model.frag", ShaderType::FRAGMENT);
+    modelShader.Build();
 
     Texture tex("res/textures/stone_floor.jpg", 0);
     tex.Bind(0);
@@ -277,7 +279,8 @@ int main(void)
 
     Texture normalmap("res/normalmaps/stone_floor.jpg", 1);
     normalmap.Bind(1);
-    shader.SetUniform1i("_NormalMap", 1);
+	shader.SetUniform1i("_NormalMap", 1);
+
     glm::vec4 col = glm::vec4(0.70f, 0.745f, 0.99f, 1.0f);
     shader.SetUniform4fv("_Color", col);
 
@@ -322,7 +325,10 @@ int main(void)
     shader.SetUniform3fv("LightColor", lightColor);
     float arg = 0;
     float rotateTime = 0;
+    //stbi_set_flip_vertically_on_load(1);
     Model garfield = Model("res/models/Garfield/garfield.obj");
+    Model desert = Model("res/models/Desert/desert.obj");
+    //Model backpack = Model("res/models/Backpack/backpack.obj");
     while (!glfwWindowShouldClose(window))
     {
         float currentFrame = static_cast<float>(glfwGetTime());
@@ -343,6 +349,7 @@ int main(void)
         model = glm::translate(model, glm::vec3(0.5f, 0.5f, 0.0));
         model = glm::rotate(model,  glm::radians(rotateTime), glm::vec3(1.0f, 0.0f, 0.0f));
         model = glm::translate(model, glm::vec3(-0.5, -0.5, 0.0));
+        model = glm::scale(model, glm::vec3(0.1, 0.1, 0.1));
 
         // Y ROTATION
         modelY = glm::mat4(1.0f);
@@ -401,9 +408,18 @@ int main(void)
         // Main Draw Call
 
         //glDisable(GL_DEPTH_TEST);
-        shader.Unbind();
-        shaderWire.Unbind();
+        //shader.Unbind();
+        //shaderWire.Unbind();
+        modelShader.Bind();
+        glm::mat4 modelGarf = glm::mat4(1.0f);
+        modelGarf = glm::translate(modelGarf, glm::vec3(0.0f, 0.0f, 0.0));
+        //modelShader.SetUniformMatrix4f("modelGarf", modelGarf);
+        //modelShader.SetUniformMatrix4f("viewGarf", view);
+		//modelShader.SetUniformMatrix4f("projGarf", proj);
+        modelShader.SetUniformMatrix4f("MVP", MVP);
         garfield.Draw(modelShader);
+        //backpack.Draw(modelShader);
+        //desert.Draw(modelShader);
 
         if (isFill)
         {
@@ -470,30 +486,30 @@ int main(void)
             ImGui::TreePop();
         }
 
-        if (ImGui::TreeNode("Textures"))
-        {
-            ImGui::Checkbox("Texture?", &hasTexture);
+        //if (ImGui::TreeNode("Textures"))
+        //{
+        //    ImGui::Checkbox("Texture?", &hasTexture);
 
-            if (hasTexture)
-            {
-                ImGui::Image(reinterpret_cast<void*>(static_cast <intptr_t>(tex.GetID())), ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
-                DisplayFileDialog(&tex, "Change texture...", "Choose texture", 0);
-            }
-            else
-            {
-                ImGui::ColorEdit4("Solid Color", (float*)&col);
-                shader.SetUniform4fv("_Color", col);
-            }
+        //    if (hasTexture)
+        //    {
+        //        ImGui::Image(reinterpret_cast<void*>(static_cast <intptr_t>(tex.GetID())), ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
+        //        DisplayFileDialog(&tex, "Change texture...", "Choose texture", 0);
+        //    }
+        //    else
+        //    {
+        //        ImGui::ColorEdit4("Solid Color", (float*)&col);
+        //        shader.SetUniform4fv("_Color", col);
+        //    }
 
-            ImGui::Checkbox("NormalMap?", &hasNormals);
-            if (hasNormals)
-            {
-                ImGui::Image(reinterpret_cast<void*>(static_cast <intptr_t>(normalmap.GetID())), ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
-                DisplayFileDialog(&normalmap, "Change normal...", "Choose normalmap", 1);
-            }
-            ImGui::TreePop();
-        }
-        
+        //    ImGui::Checkbox("NormalMap?", &hasNormals);
+        //    if (hasNormals)
+        //    {
+        //        ImGui::Image(reinterpret_cast<void*>(static_cast <intptr_t>(normalmap.GetID())), ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
+        //        DisplayFileDialog(&normalmap, "Change normal...", "Choose normalmap", 1);
+        //    }
+        //    ImGui::TreePop();
+        //}
+        //
         if(ImGui::TreeNode("Surface"))
         {
             ImGui::SliderInt("Tesselation Level", &tessLevel , 4, 64);
