@@ -32,27 +32,32 @@ float CalcFogFactor(vec3 fragPos)
 void main()
 {
     // ambient
-    vec3 ambient = light.ambient * texture(texture_diffuse1, texCoords).rgb;
+    vec3 ambient = light.ambient;
       
     // diffuse 
     vec3 norm = normalize(worldNormal);
     vec3 lightDir = normalize(light.position - fragPos);
     float diff = max(dot(norm, lightDir), 0.0);
-    vec3 diffuse = light.diffuse  * diff * texture(texture_diffuse1, texCoords).rgb;  
+    vec3 diffuse = light.diffuse  * diff;  
     
     // specular
     vec3 viewDir = normalize(viewPos -fragPos);
     vec3 reflectDir = reflect(-lightDir, norm);  
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 1.0f);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 140.0f);
     vec3 specular = light.specular * spec;
+
+    // Attenuation
+    //float distance = length(light.position - fragPos);
+    //float attenuation = 1.0 / (1.0 + 0.1 * distance + 0.01 * distance * distance);
 
       
     vec3 result = ambient + diffuse + specular; 
-    result = clamp(result, 0.0, 1.0);
-    float fogFactor = CalcFogFactor(fragPos);
-    result = mix(fogColor, result, fogFactor);
+    //float fogFactor = CalcFogFactor(fragPos);
+    //result = mix(fogColor, result, fogFactor);
 
+    //result = clamp(result, 0.0, 1.0);
+    vec4 textureColor = texture(texture_diffuse1, texCoords);
     
-    fragColor = vec4(result, 1.0);
+    fragColor = vec4(result, 1.0) * textureColor;
 
 }

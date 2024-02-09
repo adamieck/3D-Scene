@@ -4,6 +4,8 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <GL/gl.h>
+#include <GL/gl.h>
 
 #include "Camera.h"
 #include "VertexBuffer.h"
@@ -164,9 +166,9 @@ glm::mat4 circularMotion(float& timeElapsed, float deltaTime) {
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(x, 5.0f, z));
 
-    float rotationAngle = timeElapsed * speed;
+    float rotationAngle = atan2(x - 11, z);
     model = glm::rotate(model, glm::degrees(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    model = glm::rotate(model, rotationAngle, glm::vec3(0.0f, 0.0f, 1.0f));
+	model = glm::rotate(model, rotationAngle, glm::vec3(0.0f, 0.0f, 1.0f));
 
     return model;
 }
@@ -278,8 +280,8 @@ int main(void)
     va.AddBuffer(vb, layout);
 
     Shader modelShader;
-    modelShader.AddShader("res/shaders/model.vert", ShaderType::VERTEX)
-        .AddShader("res/shaders/model.frag", ShaderType::FRAGMENT);
+    modelShader.AddShader("res/shaders/viewPhong.vert", ShaderType::VERTEX)
+        .AddShader("res/shaders/viewPhong.frag", ShaderType::FRAGMENT);
     modelShader.Build();
     
     Shader shader;
@@ -289,7 +291,6 @@ int main(void)
         .AddShader("res/shaders/texture.tes", ShaderType::TESS_EVAL);
     shader.Build();
     shader.Bind();
-
 
 
     Texture tex("res/textures/carpet.jpg", 0);
@@ -329,24 +330,22 @@ int main(void)
     float zLight = 0.3f;
     bool paused = false;
 
+    bool isNight = false;
     float fogIntensity = 0.5;
     glm::vec3 fogColor = glm::vec3(0.286f, 0.902f, 0.902f);
 
-    glm::vec3 lightColor(1.0, 1.0, 1.0);
-    //float reflectorAlpha = 0.1f;
-    //shader.SetUniform1f("Kd", Kd);
-    //shader.SetUniform1f("Ks", Ks);
-    //shader.SetUniform1f("m", m);
-    //shader.SetUniform3f("LightPosition", 0.5f, 0.5f, zLight);
-    //shader.SetUniform3fv("LightColor", lightColor);
-    //stbi_set_flip_vertically_on_load(0);
-    Model garfield = Model("res/models/Garfield/garfield.obj");
+
+    //Model garfield = Model("res/models/Garfield/garfield.obj");
     Model desert = Model("res/models/Desert/desert2.obj");
+    //Model diorama = Model("res/models/Desert/diorama.obj");
     //Model backpack = Model("res/models/Backpack/backpack.obj");
-    Light light{ glm::vec3(6.9,-2.5,11.9), glm::vec3(0.5,0.5,0.5),
-    glm::vec3(0.8,0.8,0.8), glm::vec3(0.2,0.2,0.2) };
+    Light light{ glm::vec3(5.0,0.44,12.08), glm::vec3(0.5,0.5,0.5),
+    glm::vec3(0.8,0.8,0.8), glm::vec3(0.4,0.4,0.4) };
 
     float timeElapsed = 0.0f;
+    const char* cameras[] = { "Free", "Fixed", "Tracking", "TPP" };
+    static int currentCamera = 0;
+
     model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(0.0f, 5.0f, 0.0));
     model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0, 0.0, 0.0));
@@ -355,6 +354,7 @@ int main(void)
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+
         // Process input
         processInput(window);
 
@@ -365,7 +365,30 @@ int main(void)
 
 
         model = circularMotion(timeElapsed, deltaTime);
-        view = camera.GetViewMatrix();
+        glm::vec3 targetPosition = glm::vec3(model[3]);
+        switch (currentCamera) {
+        case 0:
+            view = camera.GetViewMatrix();
+            break;
+        case 1:
+            view = glm::lookAt(glm::vec3(-25.0f, 15.7f, -17.6f), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0, 1, 0));
+            break;
+        case 2:
+            
+            view = glm::lookAt(glm::vec3(9.5f, 20.0f, 0.0f), targetPosition, glm::vec3(0, 1, 0));
+            break;
+        case 3:
+            glm::vec3 targetForward = glm::normalize(glm::vec3(model[1]));
+            glm::vec3 viewDirection = -targetForward;
+            glm::vec3 cameraPosition = targetPosition + (3.0f * viewDirection);
+            view = glm::lookAt(cameraPosition, targetPosition, glm::vec3(0.0, 1.0, 0.0));
+        default:
+            camera.GetViewMatrix();
+            break;
+        }
+        //view = camera.GetViewMatrix();
+
+
         proj = glm::perspective(glm::radians(45.0f), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
         MVP = proj * view * model;
         glm::vec3 viewPos = glm::inverse(view)[3];
@@ -388,11 +411,13 @@ int main(void)
         modelShader.SetUniform3fv("light.specular", light.specular);
         modelShader.SetUniform1f("fogIntensity", fogIntensity);
         modelShader.SetUniform3fv("fogColor", fogColor);
-        modelShader.SetUniform3fv("viewPos", viewPos);
+        //modelShader.SetUniform3fv("viewPos", viewPos);
+
 
         //modelShader.SetUniformMatrix4f("MVP", MVP);
         desert.Draw(modelShader);
-        garfield.Draw(modelShader);
+        //garfield.Draw(modelShader);
+        //diorama.Draw(modelShader);
         modelShader.Unbind();
 
         // Bezier draw
@@ -417,32 +442,36 @@ int main(void)
         FPSCounter(deltaTime);
         ImGui::Text(glm::to_string(viewPos).c_str());
         ImGui::Separator();
-        ImGui::Checkbox("Wireframe", &isWireframe);
-        ImGui::Checkbox("Fill", &isFill);
-
-
         // Light
         ImGui::SetNextItemOpen(true, ImGuiCond_Once);
         if (ImGui::TreeNode("Light"))
         {
 			ImGui::Text("Parameters:");
-            ImGui::SliderFloat("Z-Position", &zLight, 0.0f, 2.0f);
-            ImGui::SliderFloat("Kd", &Kd, 0.0f, 1.0f);
-
-            ImGui::SliderFloat("Ks", &Ks, 0.0f, 1.0f);
             ImGui::SliderFloat("Fog Intensity", &fogIntensity, 0.0f, 1.0f);
 
             ImGui::ColorEdit3("Fog Color", (float*)&fogColor);
             ImGui::Checkbox("Light?", &hasLight);
             ImGui::Checkbox("Reflectors?", &hasReflectors);
 
-
-            if (ImGui::Button("Toggle Animation")) {
-                paused = !paused;
+            if (ImGui::Button("Day!")) {
+                renderer.ChangeBackground(0.286f, 0.902f, 0.902f);
+                fogColor = glm::vec3(0.286f, 0.902f, 0.902f);
+                light.ambient = glm::vec3(0.5, 0.5, 0.5);
             }
+            if (ImGui::Button("Night!")) {
+                renderer.ChangeBackground(0.141f, 0.129f, 0.2f);
+                fogColor = glm::vec3(0.141f, 0.129f, 0.2f);
+                light.ambient = glm::vec3(0.00, 0.00, 0.0);
+            }
+
             ImGui::TreePop();
         }
 
+        if (ImGui::TreeNode("Camera"))
+        {
+            ImGui::Combo("Camera", &currentCamera, cameras, IM_ARRAYSIZE(cameras));
+            ImGui::TreePop();
+        }
 
         if(ImGui::TreeNode("Surface"))
         {

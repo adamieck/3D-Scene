@@ -44,10 +44,11 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
     std::vector<Tex> textures;
-    Vertex vertex;
+    
     
     for (unsigned int i = 0; i < mesh->mNumVertices; i++)
     {
+        Vertex vertex;
         glm::vec3 vector;
         vector.x = mesh->mVertices[i].x;
         vector.y = mesh->mVertices[i].y;

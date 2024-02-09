@@ -3,13 +3,20 @@
 void Renderer::Clear()
 {
 	//glClearColor(0.19f, 0.196f, 0.267f, 1.0f); // bg Surface0 cattpuccin mocha
-	glClearColor(0.286f, 0.902f, 0.902f, 1.0f);
+	glClearColor(bgR, bgG, bgB, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void Renderer::SetPolygonMode(int mode)
 {
 	glPolygonMode(GL_FRONT_AND_BACK, mode);
+}
+
+void Renderer::ChangeBackground(float r, float g, float b)
+{
+	bgR = r;
+	bgG = g;
+	bgB = b;
 }
 
 void Renderer::Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) const
