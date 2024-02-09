@@ -8,7 +8,7 @@ out vec4 fragColor;
 
 //uniform vec4 _Color;
 uniform sampler2D _Tex;
-uniform sampler2D _NormalMap;
+//uniform sampler2D _NormalMap;
 
 in vec3 Normal;
 

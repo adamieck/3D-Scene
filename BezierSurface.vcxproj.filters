@@ -547,6 +547,8 @@
     <None Include="res\shaders\viewPhong.frag" />
     <None Include="res\shaders\viewGouraud.vert" />
     <None Include="res\shaders\viewGouraud.frag" />
+    <None Include="res\shaders\flat.vert" />
+    <None Include="res\shaders\flat.frag" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Renderer.h">

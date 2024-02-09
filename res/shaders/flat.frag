@@ -1,6 +1,6 @@
 #version 410 core
 
-in vec4 FragColor;
+flat in vec4 FragColor;
 
 void main()
 {

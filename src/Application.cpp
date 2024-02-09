@@ -280,11 +280,21 @@ int main(void)
     va.AddBuffer(vb, layout);
     va.Unbind();
 
-    Shader modelShader;
-    modelShader.AddShader("res/shaders/viewPhong.vert", ShaderType::VERTEX)
+    Shader phongShader;
+    phongShader.AddShader("res/shaders/viewPhong.vert", ShaderType::VERTEX)
         .AddShader("res/shaders/viewPhong.frag", ShaderType::FRAGMENT);
-    modelShader.Build();
-    Model desert = Model("res/models/Desert/oasis.obj");
+    phongShader.Build();
+
+    Shader gouraudShader;
+    gouraudShader.AddShader("res/shaders/viewGouraud.vert", ShaderType::VERTEX)
+        .AddShader("res/shaders/viewGouraud.frag", ShaderType::FRAGMENT);
+    gouraudShader.Build();
+
+    Shader flatShader;
+    flatShader.AddShader("res/shaders/flat.vert", ShaderType::VERTEX)
+        .AddShader("res/shaders/flat.frag", ShaderType::FRAGMENT);
+    flatShader.Build();
+    
 
     Shader shader;
     shader.AddShader("res/shaders/texture.vert", ShaderType::VERTEX)
@@ -325,27 +335,23 @@ int main(void)
 	glPatchParameteri(GL_PATCH_VERTICES, tessLevel);
     shader.SetUniform1f("TessLevel", float(tessLevel));
 
-
-    float Kd = 0.5f;
-    float Ks = 0.5f;
-    float m = 1.0f;
-    float zLight = 0.3f;
-    bool paused = false;
-
-    bool isNight = false;
     float fogIntensity = 0.5;
     glm::vec3 fogColor = glm::vec3(0.286f, 0.902f, 0.902f);
+    Model desert = Model("res/models/Desert/oasis.obj");
 
     va.Unbind();
     //Model garfield = Model("res/models/Garfield/garfield.obj");
-    Model diorama = Model("res/models/Desert/diorama.obj");
+    //Model diorama = Model("res/models/Desert/diorama.obj");
     //Model backpack = Model("res/models/Backpack/backpack.obj");
-    Light light{ glm::vec3(5.0,0.44,12.08), glm::vec3(0.5,0.5,0.5),
+    Light light{ glm::vec3(5.0,25.44,12.08), glm::vec3(0.5,0.5,0.5),
     glm::vec3(0.8,0.8,0.8), glm::vec3(0.4,0.4,0.4) };
 
     float timeElapsed = 0.0f;
     const char* cameras[] = { "Free", "Fixed", "Tracking", "TPP" };
     static int currentCamera = 0;
+
+    const char* shaders[] = { "Flat", "Phong", "Gouraud"};
+    static int currentShader = 0;
 
     model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(0.0f, 5.0f, 0.0));
@@ -399,27 +405,56 @@ int main(void)
         // Main Draw Call
 
         // Desert draw
-        modelShader.Bind();
         glm::mat4 modelDesert = glm::mat4(1.0f);
         modelDesert = glm::scale(modelDesert, glm::vec3(0.5, 0.5, 0.5));
         modelDesert = glm::translate(modelDesert, glm::vec3(20.0f, -20.0f, 0.0));
-        modelShader.SetUniformMatrix4f("model", modelDesert);
-        modelShader.SetUniformMatrix4f("view", view);
-		modelShader.SetUniformMatrix4f("proj", proj);
-        modelShader.SetUniform3fv("light.position", light.position);
-        modelShader.SetUniform3fv("light.ambient", light.ambient);
-        modelShader.SetUniform3fv("light.diffuse", light.diffuse);
-        modelShader.SetUniform3fv("light.specular", light.specular);
-        modelShader.SetUniform1f("fogIntensity", fogIntensity);
-        modelShader.SetUniform3fv("fogColor", fogColor);
-        //modelShader.SetUniform3fv("viewPos", viewPos);
 
-
-        //modelShader.SetUniformMatrix4f("MVP", MVP);
-        desert.Draw(modelShader);
-        //garfield.Draw(modelShader);
-        diorama.Draw(modelShader);
-        modelShader.Unbind();
+        switch (currentShader) {
+        case 0:
+            flatShader.Bind();
+            flatShader.SetUniformMatrix4f("model", modelDesert);
+            flatShader.SetUniformMatrix4f("view", view);
+            flatShader.SetUniformMatrix4f("proj", proj);
+            flatShader.SetUniform3fv("light.position", light.position);
+            flatShader.SetUniform3fv("light.ambient", light.ambient);
+            flatShader.SetUniform3fv("light.diffuse", light.diffuse);
+            flatShader.SetUniform3fv("light.specular", light.specular);
+            flatShader.SetUniform1f("fogIntensity", fogIntensity);
+            flatShader.SetUniform3fv("fogColor", fogColor);
+            desert.Draw(flatShader);
+            flatShader.Unbind();
+            break;
+        case 1:
+            phongShader.Bind();
+            phongShader.SetUniformMatrix4f("model", modelDesert);
+            phongShader.SetUniformMatrix4f("view", view);
+            phongShader.SetUniformMatrix4f("proj", proj);
+            phongShader.SetUniform3fv("light.position", light.position);
+            phongShader.SetUniform3fv("light.ambient", light.ambient);
+            phongShader.SetUniform3fv("light.diffuse", light.diffuse);
+            phongShader.SetUniform3fv("light.specular", light.specular);
+            phongShader.SetUniform1f("fogIntensity", fogIntensity);
+            phongShader.SetUniform3fv("fogColor", fogColor);
+            desert.Draw(phongShader);
+            phongShader.Unbind();
+            break;
+        case 2:
+            gouraudShader.Bind();
+            gouraudShader.SetUniformMatrix4f("model", modelDesert);
+            gouraudShader.SetUniformMatrix4f("view", view);
+            gouraudShader.SetUniformMatrix4f("proj", proj);
+            gouraudShader.SetUniform3fv("light.position", light.position);
+            gouraudShader.SetUniform3fv("light.ambient", light.ambient);
+            gouraudShader.SetUniform3fv("light.diffuse", light.diffuse);
+            gouraudShader.SetUniform3fv("light.specular", light.specular);
+            gouraudShader.SetUniform1f("fogIntensity", fogIntensity);
+            gouraudShader.SetUniform3fv("fogColor", fogColor);
+            desert.Draw(gouraudShader);
+            gouraudShader.Unbind();
+            break;
+        default:
+            break;
+        }
 
         // Bezier draw
         for(int i = 0; i < 16; i++)
@@ -456,11 +491,13 @@ int main(void)
                 renderer.ChangeBackground(0.286f, 0.902f, 0.902f);
                 fogColor = glm::vec3(0.286f, 0.902f, 0.902f);
                 light.ambient = glm::vec3(0.5, 0.5, 0.5);
+                light.diffuse = glm::vec3(0.8, 0.8, 0.8);
             }
             if (ImGui::Button("Night!")) {
                 renderer.ChangeBackground(0.141f, 0.129f, 0.2f);
                 fogColor = glm::vec3(0.141f, 0.129f, 0.2f);
                 light.ambient = glm::vec3(0.00, 0.00, 0.0);
+                light.diffuse = glm::vec3(0.00, 0.00, 0.0);
             }
 
             ImGui::TreePop();
@@ -471,6 +508,13 @@ int main(void)
             ImGui::Combo("Camera", &currentCamera, cameras, IM_ARRAYSIZE(cameras));
             ImGui::TreePop();
         }
+
+        if (ImGui::TreeNode("Shaders"))
+        {
+            ImGui::Combo("Shaders", &currentShader, shaders, IM_ARRAYSIZE(shaders));
+            ImGui::TreePop();
+        }
+
 
         if(ImGui::TreeNode("Surface"))
         {

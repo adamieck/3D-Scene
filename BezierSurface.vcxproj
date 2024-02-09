@@ -198,6 +198,8 @@
     <None Include="dependencies\assimp\include\vector2.inl" />
     <None Include="dependencies\assimp\include\vector3.inl" />
     <None Include="res\shaders\basic.frag" />
+    <None Include="res\shaders\flat.frag" />
+    <None Include="res\shaders\flat.vert" />
     <None Include="res\shaders\model.frag" />
     <None Include="res\shaders\model.vert" />
     <None Include="res\shaders\texture.frag" />
