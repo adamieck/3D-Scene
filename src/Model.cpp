@@ -44,10 +44,10 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
     std::vector<Tex> textures;
-
+    Vertex vertex;
+    
     for (unsigned int i = 0; i < mesh->mNumVertices; i++)
     {
-        Vertex vertex;
         glm::vec3 vector;
         vector.x = mesh->mVertices[i].x;
         vector.y = mesh->mVertices[i].y;
@@ -71,6 +71,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
             vertex.texCoords = glm::vec2(0.0f, 0.0f);
         vertices.push_back(vertex);
     }
+    
     // process indices
     for (unsigned int i = 0; i < mesh->mNumFaces; i++)
     {
@@ -90,9 +91,10 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
                 std::vector<Tex> specularMaps = loadMaterialTextures(material,
                                                                          aiTextureType_SPECULAR, "texture_specular");
                 textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+
             }
         }
-
+        
         return { vertices, indices, textures};
 }
 

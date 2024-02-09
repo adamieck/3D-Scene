@@ -326,8 +326,8 @@ int main(void)
     float arg = 0;
     float rotateTime = 0;
     //stbi_set_flip_vertically_on_load(1);
-    Model garfield = Model("res/models/Garfield/garfield.obj");
-    Model desert = Model("res/models/Desert/desert.obj");
+    //Model garfield = Model("res/models/Garfield/garfield.obj");
+    Model desert = Model("res/models/Desert/desert2.obj");
     //Model backpack = Model("res/models/Backpack/backpack.obj");
     while (!glfwWindowShouldClose(window))
     {
@@ -417,9 +417,9 @@ int main(void)
         //modelShader.SetUniformMatrix4f("viewGarf", view);
 		//modelShader.SetUniformMatrix4f("projGarf", proj);
         modelShader.SetUniformMatrix4f("MVP", MVP);
-        garfield.Draw(modelShader);
+        //garfield.Draw(modelShader);
         //backpack.Draw(modelShader);
-        //desert.Draw(modelShader);
+        desert.Draw(modelShader);
 
         if (isFill)
         {
