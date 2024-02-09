@@ -153,6 +153,23 @@ void DisplayFileDialog(Texture* texture, const char* buttonTitle, const char* di
         ImGuiFileDialog::Instance()->Close();
     }
 }
+glm::mat4 circularMotion(float& timeElapsed, float deltaTime) {
+    float radius = 20.0f;
+    float speed = 0.1f;  
+
+    float centerX = 11.0f;
+    float x = centerX + radius * cos(timeElapsed * speed);
+    float z = radius * sin(timeElapsed * speed);
+
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(x, 5.0f, z));
+
+    float rotationAngle = timeElapsed * speed;
+    model = glm::rotate(model, glm::degrees(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    model = glm::rotate(model, rotationAngle, glm::vec3(0.0f, 0.0f, 1.0f));
+
+    return model;
+}
 
 void ImGuiSetCatppuccinTheme()
 {
@@ -235,9 +252,9 @@ int main(void)
     2.0 / 3.0, 1.0f, 0.0f,    2.0 / 3.0, 1.0f,
     1.0f, 1.0f, 0.0f,         1.0f, 1.0f,
     
-    0.0f, 2.0/ 3.0, 1.0f,       0.0f, 2.0 / 3.0,
+    0.0f, 2.0/ 3.0, 0.0f,       0.0f, 2.0 / 3.0,
     1.0 / 3.0, 2.0 / 3.0, 0.0f, 1.0 / 3.0, 2.0 / 3.0,
-    2.0 / 3.0, 2.0 / 3.0, -1.0f, 2.0 / 3.0, 2.0 / 3.0,
+    2.0 / 3.0, 2.0 / 3.0, 0.0f, 2.0 / 3.0, 2.0 / 3.0,
     1.0f, 2.0 / 3.0, 0.0f,      1.0f, 2.0 / 3.0,
     
     0.0f, 1.0 / 3.0, 0.0f,      0.0f, 1.0 / 3.0,
@@ -247,7 +264,7 @@ int main(void)
     
     0.0f, 0.0f, 0.0f,      0.0f, 0.0f,
     1.0 / 3.0, 0.0f, 0.0f, 1.0 / 3.0, 0.0f,
-    2.0 / 3.0, 0.0f, 0.1f, 2.0 / 3.0, 0.0f,
+    2.0 / 3.0, 0.0f, 0.0f, 2.0 / 3.0, 0.0f,
     1.0f, 0.0f, 0.0f,      1.0f, 0.0f,
 
     };
@@ -312,6 +329,9 @@ int main(void)
     float zLight = 0.3f;
     bool paused = false;
 
+    float fogIntensity = 0.5;
+    glm::vec3 fogColor = glm::vec3(0.286f, 0.902f, 0.902f);
+
     glm::vec3 lightColor(1.0, 1.0, 1.0);
     //float reflectorAlpha = 0.1f;
     //shader.SetUniform1f("Kd", Kd);
@@ -319,12 +339,17 @@ int main(void)
     //shader.SetUniform1f("m", m);
     //shader.SetUniform3f("LightPosition", 0.5f, 0.5f, zLight);
     //shader.SetUniform3fv("LightColor", lightColor);
-    stbi_set_flip_vertically_on_load(1);
+    //stbi_set_flip_vertically_on_load(0);
     Model garfield = Model("res/models/Garfield/garfield.obj");
     Model desert = Model("res/models/Desert/desert2.obj");
     //Model backpack = Model("res/models/Backpack/backpack.obj");
-    Light light{ glm::vec3(6.9,-2.5,11.9), glm::vec3(0.1,0.1,0.1),
-    glm::vec3(1.0,1.0,1.0), glm::vec3(0.2,0.2,0.2) };
+    Light light{ glm::vec3(6.9,-2.5,11.9), glm::vec3(0.5,0.5,0.5),
+    glm::vec3(0.8,0.8,0.8), glm::vec3(0.2,0.2,0.2) };
+
+    float timeElapsed = 0.0f;
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(0.0f, 5.0f, 0.0));
+    model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0, 0.0, 0.0));
     while (!glfwWindowShouldClose(window))
     {
         float currentFrame = static_cast<float>(glfwGetTime());
@@ -336,8 +361,10 @@ int main(void)
         // Render
         renderer.Clear();
 
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, 5.0f, 0.0));
+        timeElapsed += deltaTime;
+
+
+        model = circularMotion(timeElapsed, deltaTime);
         view = camera.GetViewMatrix();
         proj = glm::perspective(glm::radians(45.0f), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
         MVP = proj * view * model;
@@ -359,19 +386,28 @@ int main(void)
         modelShader.SetUniform3fv("light.ambient", light.ambient);
         modelShader.SetUniform3fv("light.diffuse", light.diffuse);
         modelShader.SetUniform3fv("light.specular", light.specular);
-        modelShader.SetUniform1f("fogIntensity", 0.9);
-        modelShader.SetUniform3fv("fogColor", glm::vec3(0.3, 0.3, 0.3));
+        modelShader.SetUniform1f("fogIntensity", fogIntensity);
+        modelShader.SetUniform3fv("fogColor", fogColor);
         modelShader.SetUniform3fv("viewPos", viewPos);
 
         //modelShader.SetUniformMatrix4f("MVP", MVP);
         desert.Draw(modelShader);
+        garfield.Draw(modelShader);
         modelShader.Unbind();
 
         // Bezier draw
+        for(int i = 0; i < 16; i++)
+        {
+            vertices[i * 5 + 2] = (float)sin(timeElapsed + (i / 4)) * 0.3;
+        }
+        vb.Bind();
+        vb.Update(vertices, sizeof(vertices));
+        
         shader.Bind();
         shader.SetUniformMatrix4f("MVP", MVP);
         shader.SetUniform1f("TessLevel", float(tessLevel));
         renderer.Draw(va, shader, sizeof(vertices) / (sizeof(float) * 5));
+        vb.Unbind();
 
     	// ImGui here //
         ImGui_ImplOpenGL3_NewFrame();
@@ -390,13 +426,13 @@ int main(void)
         if (ImGui::TreeNode("Light"))
         {
 			ImGui::Text("Parameters:");
-            ImGui::SliderFloat("Z-Position", &zLight, 0.0, 2.0);
-            ImGui::SliderFloat("Kd", &Kd, 0.0, 1.0);
+            ImGui::SliderFloat("Z-Position", &zLight, 0.0f, 2.0f);
+            ImGui::SliderFloat("Kd", &Kd, 0.0f, 1.0f);
 
-            ImGui::SliderFloat("Ks", &Ks, 0.0, 1.0);
-            ImGui::SliderFloat("m", &m, 1.0, 100.0);
+            ImGui::SliderFloat("Ks", &Ks, 0.0f, 1.0f);
+            ImGui::SliderFloat("Fog Intensity", &fogIntensity, 0.0f, 1.0f);
 
-            ImGui::ColorEdit3("Color", (float*)&lightColor);
+            ImGui::ColorEdit3("Fog Color", (float*)&fogColor);
             ImGui::Checkbox("Light?", &hasLight);
             ImGui::Checkbox("Reflectors?", &hasReflectors);
 

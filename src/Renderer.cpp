@@ -2,7 +2,8 @@
 
 void Renderer::Clear()
 {
-	glClearColor(0.19f, 0.196f, 0.267f, 1.0f); // bg Surface0 cattpuccin mocha
+	//glClearColor(0.19f, 0.196f, 0.267f, 1.0f); // bg Surface0 cattpuccin mocha
+	glClearColor(0.286f, 0.902f, 0.902f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
