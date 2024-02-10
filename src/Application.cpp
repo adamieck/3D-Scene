@@ -36,6 +36,18 @@ struct Light {
     glm::vec3 specular;
 };
 
+struct Pointlight{
+	glm::vec3 position;
+
+	glm::vec3 ambient;
+	glm::vec3 diffuse;
+	glm::vec3 specular;
+
+    float constant;
+    float linear;
+    float quadratic;
+};
+
 // camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 float lastX = WIDTH / 2.0f;
@@ -57,7 +69,7 @@ bool hasNormals = true;
 bool hasReflectors = true;
 bool hasLight = true;
 float turnSpeed = 1.0;
-float movementSpeed = 1.0;
+float movementSpeed = 5.0;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -214,7 +226,27 @@ void ImGuiSetCatppuccinTheme()
     colors[ImGuiCol_TitleBgActive] = ImVec4{ 0.498, 0.517, 0.611, 1.0f };
     colors[ImGuiCol_TitleBgCollapsed] = ImVec4{ 0.498, 0.517, 0.611, 1.0f };
 }
-
+void setCommonShaderUniforms(Shader& shader, const glm::mat4& model, const glm::mat4& view, const glm::mat4& proj,
+    const Light& light, float fogIntensity, const glm::vec3& fogColor,
+    const Pointlight& carpetLight)
+{
+    shader.SetUniformMatrix4f("model", model);
+    shader.SetUniformMatrix4f("view", view);
+    shader.SetUniformMatrix4f("proj", proj);
+    shader.SetUniform3fv("light.position", light.position);
+    shader.SetUniform3fv("light.ambient", light.ambient);
+    shader.SetUniform3fv("light.diffuse", light.diffuse);
+    shader.SetUniform3fv("light.specular", light.specular);
+    shader.SetUniform1f("fogIntensity", fogIntensity);
+    shader.SetUniform3fv("fogColor", fogColor);
+    shader.SetUniform3fv("carpetLight.position", carpetLight.position);
+    shader.SetUniform3fv("carpetLight.ambient", carpetLight.ambient);
+    shader.SetUniform3fv("carpetLight.diffuse", carpetLight.diffuse);
+    shader.SetUniform3fv("carpetLight.specular", carpetLight.specular);
+    shader.SetUniform1f("carpetLight.constant", carpetLight.constant);
+    shader.SetUniform1f("carpetLight.linear", carpetLight.linear);
+    shader.SetUniform1f("carpetLight.quadratic", carpetLight.quadratic);
+}
 int main(void) 
 {
     /* INITIALIZATION */
@@ -337,6 +369,10 @@ int main(void)
     Light light{ glm::vec3(5.0,5.44,12.08), glm::vec3(0.5,0.5,0.5),
     glm::vec3(0.8,0.8,0.8), glm::vec3(0.4,0.4,0.4) };
 
+    Pointlight carpetLight{ glm::vec3(5.0,5.44,12.08), glm::vec3(0.5,0.5,0.5),
+glm::vec3(0.8,0.8,0.8), glm::vec3(0.4,0.4,0.4),
+    1.0, 0.07f, 0.017f};
+
     float timeElapsed = 0.0f;
     const char* cameras[] = { "Free", "Fixed", "Tracking", "TPP" };
     static int currentCamera = 0;
@@ -345,8 +381,8 @@ int main(void)
     static int currentShader = 0;
 
     model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(0.0f, 5.0f, 0.0));
-    model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0, 0.0, 0.0));
+    model = glm::translate(model, glm::vec3(0.0f, 5.0f, 0.0f));
+    model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 0.0f));
     while (!glfwWindowShouldClose(window))
     {
         float currentFrame = static_cast<float>(glfwGetTime());
@@ -365,7 +401,7 @@ int main(void)
 
         model = circularMotion(timeElapsed, deltaTime);
         glm::vec3 targetPosition = glm::vec3(model[3]);
-        float distFromTarget = 3.0f;
+        float distFromTarget = 2.0f;
         switch (currentCamera) {
         case 0:
             view = camera.GetViewMatrix();
@@ -380,13 +416,14 @@ int main(void)
             glm::vec3 targetForward = glm::normalize(glm::vec3(model[1]));
             glm::vec3 viewDirection = -targetForward;
             glm::vec3 cameraPosition = targetPosition + (distFromTarget * viewDirection);
-            view = glm::lookAt(cameraPosition, targetPosition, glm::vec3(0.0, 1.0, 0.0));
+            view = glm::lookAt(cameraPosition + glm::vec3(0.0, 0.5, 0.0), targetPosition, glm::vec3(0.0, 1.0, 0.0));
             break;
         default:
             camera.GetViewMatrix();
             break;
         }
 
+        carpetLight.position = targetPosition;
 
         proj = glm::perspective(glm::radians(45.0f), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
         MVP = proj * view * model;
@@ -403,43 +440,19 @@ int main(void)
         switch (currentShader) {
         case 0:
             flatShader.Bind();
-            flatShader.SetUniformMatrix4f("model", modelDesert);
-            flatShader.SetUniformMatrix4f("view", view);
-            flatShader.SetUniformMatrix4f("proj", proj);
-            flatShader.SetUniform3fv("light.position", light.position);
-            flatShader.SetUniform3fv("light.ambient", light.ambient);
-            flatShader.SetUniform3fv("light.diffuse", light.diffuse);
-            flatShader.SetUniform3fv("light.specular", light.specular);
-            flatShader.SetUniform1f("fogIntensity", fogIntensity);
-            flatShader.SetUniform3fv("fogColor", fogColor);
+            setCommonShaderUniforms(flatShader, modelDesert, view, proj, light, fogIntensity, fogColor, carpetLight);
             desert.Draw(flatShader);
             flatShader.Unbind();
             break;
         case 1:
             phongShader.Bind();
-            phongShader.SetUniformMatrix4f("model", modelDesert);
-            phongShader.SetUniformMatrix4f("view", view);
-            phongShader.SetUniformMatrix4f("proj", proj);
-            phongShader.SetUniform3fv("light.position", light.position);
-            phongShader.SetUniform3fv("light.ambient", light.ambient);
-            phongShader.SetUniform3fv("light.diffuse", light.diffuse);
-            phongShader.SetUniform3fv("light.specular", light.specular);
-            phongShader.SetUniform1f("fogIntensity", fogIntensity);
-            phongShader.SetUniform3fv("fogColor", fogColor);
+            setCommonShaderUniforms(phongShader, modelDesert, view, proj, light, fogIntensity, fogColor, carpetLight);
             desert.Draw(phongShader);
             phongShader.Unbind();
             break;
         case 2:
             gouraudShader.Bind();
-            gouraudShader.SetUniformMatrix4f("model", modelDesert);
-            gouraudShader.SetUniformMatrix4f("view", view);
-            gouraudShader.SetUniformMatrix4f("proj", proj);
-            gouraudShader.SetUniform3fv("light.position", light.position);
-            gouraudShader.SetUniform3fv("light.ambient", light.ambient);
-            gouraudShader.SetUniform3fv("light.diffuse", light.diffuse);
-            gouraudShader.SetUniform3fv("light.specular", light.specular);
-            gouraudShader.SetUniform1f("fogIntensity", fogIntensity);
-            gouraudShader.SetUniform3fv("fogColor", fogColor);
+            setCommonShaderUniforms(gouraudShader, modelDesert, view, proj, light, fogIntensity, fogColor, carpetLight);
             desert.Draw(gouraudShader);
             gouraudShader.Unbind();
             break;
@@ -448,9 +461,9 @@ int main(void)
         }
 
         // Bezier draw
-        for(int i = 0; i < 16; i++)
+        for(int i = 15; i >= 0; i--)
         {
-            vertices[i * 5 + 2] = (float)sin(timeElapsed + (i / 4)) * 0.3; // "flying" animation
+            vertices[i * 5 + 2] = (float)sin(timeElapsed + (i % 4)) * 0.3; // "flying" animation
         }
         vb.Bind();
         vb.Update(vertices, sizeof(vertices));
@@ -550,6 +563,3 @@ int main(void)
 	glfwTerminate();
     return 0;
 }
-
-
-
