@@ -15,7 +15,7 @@ struct Light {
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 proj;
-uniform sampler2D texture_diffuse2;
+uniform sampler2D texture_diffuse1;
 uniform float fogIntensity;
 uniform vec3 fogColor;
 
@@ -58,7 +58,7 @@ void main()
     vec3 specular = specularStrength * spec * light.specular; 
     
     //vec2 texCoords = aTexCoords;
-    vec4 textureColor = texture(texture_diffuse2, vec2(aTexCoords));
+    vec4 textureColor = texture(texture_diffuse1, vec2(aTexCoords));
     vec3 result = (ambient + diffuse + specular) * textureColor.xyz;
 
     float fog_factor = CalcFogFactor(FragPos);

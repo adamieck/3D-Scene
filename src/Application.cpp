@@ -56,6 +56,8 @@ bool hasTexture = true;
 bool hasNormals = true;
 bool hasReflectors = true;
 bool hasLight = true;
+float turnSpeed = 1.0;
+float movementSpeed = 1.0;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -78,13 +80,13 @@ void processInput(GLFWwindow* window)
 
 
     if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-        camera.ProcessMouseMovement(0, 1);
+        camera.ProcessMouseMovement(0, 1 * turnSpeed);
     if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-        camera.ProcessMouseMovement(0, -1);
+        camera.ProcessMouseMovement(0, -1 * turnSpeed);
     if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-        camera.ProcessMouseMovement(-1, 0);
+        camera.ProcessMouseMovement(-1 * turnSpeed, 0);
     if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-        camera.ProcessMouseMovement(1, 0);
+        camera.ProcessMouseMovement(1 * turnSpeed, 0);
 }
 
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
@@ -114,7 +116,7 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
         lastX = xpos;
         lastY = ypos;
 
-        camera.ProcessMouseMovement(xoffset, yoffset);
+        //camera.ProcessMouseMovement(xoffset, yoffset); // disabled mouse control for now
     }
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE)
     {
@@ -166,7 +168,7 @@ glm::mat4 circularMotion(float& timeElapsed, float deltaTime) {
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(x, 5.0f, z));
 
-    float rotationAngle = atan2(x - 11, z);
+    float rotationAngle = atan2(x - centerX, z);
     model = glm::rotate(model, glm::degrees(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 	model = glm::rotate(model, rotationAngle, glm::vec3(0.0f, 0.0f, 1.0f));
 
@@ -280,6 +282,18 @@ int main(void)
     va.AddBuffer(vb, layout);
     va.Unbind();
 
+    Shader shader;
+    shader.AddShader("res/shaders/texture.vert", ShaderType::VERTEX)
+        .AddShader("res/shaders/texture.frag", ShaderType::FRAGMENT)
+        .AddShader("res/shaders/texture.tcs", ShaderType::TESS_CTRL)
+        .AddShader("res/shaders/texture.tes", ShaderType::TESS_EVAL);
+    shader.Build();
+    shader.Bind();
+
+    Texture tex("res/textures/carpet.jpg", 1);
+    tex.Bind(1);
+    std::cout << "Carpet text bound in slot " << tex.GetID();
+
     Shader phongShader;
     phongShader.AddShader("res/shaders/viewPhong.vert", ShaderType::VERTEX)
         .AddShader("res/shaders/viewPhong.frag", ShaderType::FRAGMENT);
@@ -294,27 +308,6 @@ int main(void)
     flatShader.AddShader("res/shaders/flat.vert", ShaderType::VERTEX)
         .AddShader("res/shaders/flat.frag", ShaderType::FRAGMENT);
     flatShader.Build();
-    
-
-    Shader shader;
-    shader.AddShader("res/shaders/texture.vert", ShaderType::VERTEX)
-        .AddShader("res/shaders/texture.frag", ShaderType::FRAGMENT)
-		.AddShader("res/shaders/texture.tcs", ShaderType::TESS_CTRL)
-        .AddShader("res/shaders/texture.tes", ShaderType::TESS_EVAL);
-    shader.Build();
-    shader.Bind();
-
-
-    Texture tex("res/textures/carpet.jpg", 0);
-    tex.Bind(0);
-    shader.SetUniform1i("_Tex", 0); // (name , tex_slot)
-
-    //Texture normalmap("res/normalmaps/stone_floor.jpg", 1);
-    //normalmap.Bind(1);
-	//shader.SetUniform1i("_NormalMap", 1);
-
-    //glm::vec4 col = glm::vec4(0.70f, 0.745f, 0.99f, 1.0f);
-    //shader.SetUniform4fv("_Color", col);
 
     Renderer renderer;
 
@@ -340,10 +333,8 @@ int main(void)
     Model desert = Model("res/models/Desert/oasis.obj");
 
     va.Unbind();
-    //Model garfield = Model("res/models/Garfield/garfield.obj");
-    //Model diorama = Model("res/models/Desert/diorama.obj");
-    //Model backpack = Model("res/models/Backpack/backpack.obj");
-    Light light{ glm::vec3(5.0,25.44,12.08), glm::vec3(0.5,0.5,0.5),
+
+    Light light{ glm::vec3(5.0,5.44,12.08), glm::vec3(0.5,0.5,0.5),
     glm::vec3(0.8,0.8,0.8), glm::vec3(0.4,0.4,0.4) };
 
     float timeElapsed = 0.0f;
@@ -361,18 +352,20 @@ int main(void)
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+        timeElapsed += deltaTime;
 
         // Process input
         processInput(window);
+        camera.ChangeMovementSpeed(movementSpeed);
 
-        // Render
+        // Render 
         renderer.Clear();
 
-        timeElapsed += deltaTime;
 
 
         model = circularMotion(timeElapsed, deltaTime);
         glm::vec3 targetPosition = glm::vec3(model[3]);
+        float distFromTarget = 3.0f;
         switch (currentCamera) {
         case 0:
             view = camera.GetViewMatrix();
@@ -381,28 +374,26 @@ int main(void)
             view = glm::lookAt(glm::vec3(-25.0f, 15.7f, -17.6f), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0, 1, 0));
             break;
         case 2:
-            
             view = glm::lookAt(glm::vec3(9.5f, 20.0f, 0.0f), targetPosition, glm::vec3(0, 1, 0));
             break;
         case 3:
             glm::vec3 targetForward = glm::normalize(glm::vec3(model[1]));
             glm::vec3 viewDirection = -targetForward;
-            glm::vec3 cameraPosition = targetPosition + (3.0f * viewDirection);
+            glm::vec3 cameraPosition = targetPosition + (distFromTarget * viewDirection);
             view = glm::lookAt(cameraPosition, targetPosition, glm::vec3(0.0, 1.0, 0.0));
+            break;
         default:
             camera.GetViewMatrix();
             break;
         }
-        //view = camera.GetViewMatrix();
 
 
         proj = glm::perspective(glm::radians(45.0f), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
         MVP = proj * view * model;
-        glm::vec3 viewPos = glm::inverse(view)[3];
+        glm::vec3 viewPos = glm::inverse(view)[3]; // 3rd row of inversed view matrix is the world position of camera
 
 
-
-        // Main Draw Call
+        // Draw Calls
 
         // Desert draw
         glm::mat4 modelDesert = glm::mat4(1.0f);
@@ -459,15 +450,17 @@ int main(void)
         // Bezier draw
         for(int i = 0; i < 16; i++)
         {
-            vertices[i * 5 + 2] = (float)sin(timeElapsed + (i / 4)) * 0.3;
+            vertices[i * 5 + 2] = (float)sin(timeElapsed + (i / 4)) * 0.3; // "flying" animation
         }
         vb.Bind();
         vb.Update(vertices, sizeof(vertices));
         
         shader.Bind();
+        tex.Bind(1);
         shader.SetUniformMatrix4f("MVP", MVP);
         shader.SetUniform1f("TessLevel", float(tessLevel));
         renderer.Draw(va, shader, sizeof(vertices) / (sizeof(float) * 5));
+        tex.Unbind();
         vb.Unbind();
 
     	// ImGui here //
@@ -506,6 +499,9 @@ int main(void)
         if (ImGui::TreeNode("Camera"))
         {
             ImGui::Combo("Camera", &currentCamera, cameras, IM_ARRAYSIZE(cameras));
+            ImGui::SliderFloat("Free camera movement speed", &movementSpeed, 0.0f, 10.0f);
+            ImGui::SliderFloat("Free camera turning speed", &turnSpeed, 0.0f, 10.0f);
+
             ImGui::TreePop();
         }
 
@@ -526,7 +522,7 @@ int main(void)
             {
                 ImGui::SliderFloat(
                     ("Ctrl Point " + std::to_string(i)).c_str(), & vertices[i * 5 + 2],
-                    0.0f, 1.0f                              
+                    -1.0f, 1.0f                              
                 );
             }
             vb.Bind();
@@ -537,7 +533,6 @@ int main(void)
             ImGui::TreePop();
         }
 
-        //ImGui::PopFont();
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         //ImGui end //

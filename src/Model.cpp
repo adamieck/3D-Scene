@@ -26,13 +26,13 @@ void Model::loadModel(std::string path)
 
 void Model::processNode(aiNode* node, const aiScene* scene)
 {
-    // process all the node's meshes (if any)
+
     for (unsigned int i = 0; i < node->mNumMeshes; i++)
     {
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
         meshes.push_back(processMesh(mesh, scene));
     }
-    // then do the same for each of its children
+
     for (unsigned int i = 0; i < node->mNumChildren; i++)
     {
         processNode(node->mChildren[i], scene);
@@ -158,7 +158,7 @@ std::vector<Tex> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type
             }
         }
         if (!skip)
-        {   // if texture hasn't been loaded already, load it
+        {   
             Tex texture;
             texture.id = TextureFromFile(str.C_Str(), directory);
             texture.type = typeName;

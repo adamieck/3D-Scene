@@ -79,8 +79,6 @@
   <ItemGroup>
     <None Include="res\shaders\texture.frag" />
     <None Include="res\shaders\texture.vert" />
-    <None Include="res\shaders\fancy.frag" />
-    <None Include="res\shaders\fancy.vert" />
     <None Include="src\glm\detail\func_common.inl">
       <Filter>Header Files</Filter>
     </None>
@@ -491,7 +489,6 @@
     </None>
     <None Include="res\shaders\texture.tcs" />
     <None Include="res\shaders\texture.tes" />
-    <None Include="res\shaders\basic.frag" />
     <None Include="dependencies\assimp\include\color4.inl">
       <Filter>Header Files</Filter>
     </None>
