@@ -546,6 +546,8 @@
     <None Include="res\shaders\viewGouraud.frag" />
     <None Include="res\shaders\flat.vert" />
     <None Include="res\shaders\flat.frag" />
+    <None Include="res\shaders\toon.vert" />
+    <None Include="res\shaders\toon.frag" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Renderer.h">

@@ -205,6 +205,8 @@
     <None Include="res\shaders\texture.tcs" />
     <None Include="res\shaders\texture.tes" />
     <None Include="res\shaders\texture.vert" />
+    <None Include="res\shaders\toon.frag" />
+    <None Include="res\shaders\toon.vert" />
     <None Include="res\shaders\viewGouraud.frag" />
     <None Include="res\shaders\viewGouraud.vert" />
     <None Include="res\shaders\viewPhong.frag" />
