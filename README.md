@@ -2,7 +2,7 @@
 An OpenGL scene renderer featuring different shaders, lights, model loading, tesselation and Bezier interpolation.
 
 # Features
-## Animated Bezier Surface (flying carpet)
+## Animated Bézier Surface (flying carpet)
 ![](docs/carpet.gif)
 ## Shaders
 Types of shaders implemented:
@@ -20,7 +20,7 @@ App implements three types of cameras:
 - Camera tracking the flying object
 - Third person camera stuck to the flyin object 
 ## Fog
-Fog that can change it's intensity and color:
+Fog that can change its intensity and color:
 ![](docs/fog.gif)
 ## Additional features
 - Day and night implementation
